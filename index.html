@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2MW Dashboard — Produk Usaha Mahasiswa 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary: #2D6A4F;
+  --primary-light: #40916C;
+  --primary-bg: #E8F5E9;
+  --accent: #D4A373;
+  --accent-light: #FAEDCD;
+  --bg: #F8FAF5;
+  --card: #FFFFFF;
+  --text: #1B4332;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%);
+  color: white;
+  padding: 40px 24px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212,163,115,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.header p {
+  font-size: 1.05rem;
+  opacity: 0.85;
+  font-weight: 300;
+  max-width: 600px;
+}
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* ── Stats ── */
+.stats-row {
+  max-width: 1200px;
+  margin: -30px auto 0;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+.stat-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.stat-number { font-size: 2rem; font-weight: 800; color: var(--primary); letter-spacing: -0.03em; }
+.stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+/* ── Container ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* ── Section ── */
+.section { margin-top: 40px; }
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+/* ── Chart Grid ── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.chart-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.chart-card:hover { box-shadow: var(--shadow-lg); }
+.chart-card h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.chart-wrapper { position: relative; height: 280px; }
+
+/* ── Filter Bar ── */
+.filter-bar {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.filter-bar input, .filter-bar select {
+  font-family: 'Inter', sans-serif;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.filter-bar input:focus, .filter-bar select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+}
+.filter-bar input { flex: 1; min-width: 200px; }
+.filter-bar select { min-width: 160px; }
+.filter-count {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Table ── */
+.table-wrapper {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  overflow-x: auto;
+  margin-top: 16px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+thead {
+  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+  color: white;
+}
+th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover { background: rgba(255,255,255,0.08); }
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #F0F7F0; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-awal { background: #FFF3E0; color: #E65100; }
+.badge-tumbuh { background: #E8F5E9; color: #2E7D32; }
+.badge-kat {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 0.75rem;
+}
+.badge-platform {
+  background: #EDE7F6;
+  color: #4527A0;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  margin: 1px;
+  display: inline-block;
+}
+td a { color: var(--primary); text-decoration: none; font-weight: 500; }
+td a:hover { text-decoration: underline; }
+.name-cell { font-weight: 600; color: var(--text); cursor: pointer; }
+.name-cell:hover { color: var(--primary); }
+
+/* ── Empty ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: white;
+  border-radius: var(--radius);
+  max-width: 700px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.2);
+  animation: modalIn 0.25s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #F8FAF5 0%, #E8F5E9 100%);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.modal-header h2 { font-size: 1.3rem; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.modal-close:hover { background: rgba(0,0,0,0.05); }
+.modal-body { padding: 24px 28px; }
+.modal-body .field { margin-bottom: 16px; }
+.modal-body .field-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.modal-body .field-value { font-size: 0.95rem; line-height: 1.7; }
+
+/* ── Footer ── */
+.footer {
+  margin-top: 60px;
+  padding: 32px 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.footer a { color: var(--primary); text-decoration: none; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .stats-row { grid-template-columns: 1fr 1fr; margin-top: -20px; }
+  .header h1 { font-size: 1.6rem; }
+  .filter-bar input { min-width: 100%; }
+  .filter-bar select { min-width: 100%; }
+  .filter-count { margin-left: 0; width: 100%; text-align: right; }
+  .modal { margin: 10px; max-height: 85vh; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #999; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-content">
+    <div class="header-badge">
+      <span>🏛️</span>
+      <span>P2MW — Program Pembinaan Mahasiswa Wirausaha</span>
+    </div>
+    <h1>Gerai Produk Usaha Mahasiswa</h1>
+    <p>Dashboard interaktif data usaha mahasiswa peserta P2MW Dikti Kemdiktisaintek RI tahun 2025. Jelajahi, filter, dan analisis ribuan inovasi usaha dari perguruan tinggi di seluruh Indonesia.</p>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow"></div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  <!-- Charts -->
+  <section class="section">
+    <div class="section-title">📊 Analisis & Visualisasi</div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Kategori Usaha</h3>
+        <div class="chart-wrapper"><canvas id="chartKategori"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Tahapan Usaha</h3>
+        <div class="chart-wrapper"><canvas id="chartTahapan"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Top Institusi</h3>
+        <div class="chart-wrapper"><canvas id="chartInstitusi"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Platform Penjualan</h3>
+        <div class="chart-wrapper"><canvas id="chartPlatform"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter + Table -->
+  <section class="section">
+    <div class="section-title">🔍 Data Usaha Mahasiswa</div>
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="Cari nama usaha, institusi, lokasi..." oninput="filterTable()">
+      <select id="filterKategori" onchange="filterTable()">
+        <option value="">Semua Kategori</option>
+      </select>
+      <select id="filterInstitusi" onchange="filterTable()">
+        <option value="">Semua Institusi</option>
+      </select>
+      <select id="filterTahapan" onchange="filterTable()">
+        <option value="">Semua Tahapan</option>
+        <option value="Tahapan Awal">Tahapan Awal</option>
+        <option value="Tahapan Bertumbuh">Tahapan Bertumbuh</option>
+      </select>
+      <span class="filter-count" id="filterCount">Menampilkan 0 data</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('nama')">Usaha ↕</th>
+            <th onclick="sortTable('kategori')">Kategori ↕</th>
+            <th onclick="sortTable('institusi')">Institusi ↕</th>
+            <th onclick="sortTable('tahapan')">Tahapan ↕</th>
+            <th onclick="sortTable('kota')">Kota ↕</th>
+            <th>Platform</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="icon">🔍</div>
+        <p>Tidak ada data yang cocok dengan filter</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitle"></h2>
+        <span class="badge badge-kat" id="modalKategori" style="margin-top:6px"></span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>Data bersumber dari <a href="https://p2mw.kemdiktisaintek.go.id/gerai" target="_blank">P2MW Kemdiktisaintek RI</a> &middot; Dashboard by Sarinem 007 &middot; Data diupdate secara berkala</p>
+</div>
+
+<script>
+// ── DATA ──
+let fullData = [];
+let filteredData = [];
+let sortKey = null;
+let sortAsc = true;
+let charts = {};
+
+async function loadData() {
+  try {
+    const resp = await fetch('data.json');
+    const json = await resp.json();
+    fullData = json.data || [];
+    renderStats(json);
+    renderFilters(json);
+    renderCharts(json);
+    filterTable();
+  } catch(e) {
+    console.error('Failed to load data:', e);
+    document.getElementById('tableBody').innerHTML = 
+      `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">❌ Gagal memuat data. Pastikan file data.json tersedia.</td></tr>`;
+  }
+}
+
+// ── STATS ──
+function renderStats(json) {
+  const row = document.getElementById('statsRow');
+  row.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon">🏪</div>
+      <div class="stat-number">${json.total}</div>
+      <div class="stat-label">Total Usaha</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏛️</div>
+      <div class="stat-number">${json.total_institusi}</div>
+      <div class="stat-label">Perguruan Tinggi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📍</div>
+      <div class="stat-number">${json.total_kota}</div>
+      <div class="stat-label">Kota/Kabupaten</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-number">${Object.keys(json.kategori).length}</div>
+      <div class="stat-label">Kategori Usaha</div>
+    </div>
+  `;
+}
+
+// ── FILTERS ──
+function renderFilters(json) {
+  const katSel = document.getElementById('filterKategori');
+  Object.keys(json.kategori).sort().forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = `${k} (${json.kategori[k]})`;
+    katSel.appendChild(opt);
+  });
+  const insSel = document.getElementById('filterInstitusi');
+  Object.keys(json.institusi_top).sort().forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k;
+    insSel.appendChild(opt);
+  });
+}
+
+// ── CHARTS ──
+const COLORS = ['#2D6A4F','#40916C','#52B788','#74C69D','#95D5B2','#B7E4C7','#D8F3DC','#E8F5E9'];
+const COLORS2 = ['#D4A373','#E6B87D','#F0C99A','#F5D9B3','#FAEDCD','#FFF8E7'];
+const COLORS3 = ['#2D6A4F','#40916C','#52B788','#74C69D','#95D5B2','#B7E4C7','#D8F3DC','#E8F5E9','#D4A373','#E6B87D','#F0C99A','#F5D9B3','#FAEDCD','#FFF8E7'];
+
+function renderCharts(json) {
+  // Kategori - Doughnut
+  const katLabels = Object.keys(json.kategori);
+  const katData = Object.values(json.kategori);
+  charts.kategori = new Chart(document.getElementById('chartKategori'), {
+    type: 'doughnut',
+    data: { labels: katLabels, datasets: [{
+      data: katData,
+      backgroundColor: COLORS.slice(0, katLabels.length),
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11, family: 'Inter' } } }
+      },
+      cutout: '60%',
+    }
+  });
+
+  // Tahapan - Pie
+  const tahLabels = Object.keys(json.tahapan);
+  const tahData = Object.values(json.tahapan);
+  charts.tahapan = new Chart(document.getElementById('chartTahapan'), {
+    type: 'pie',
+    data: { labels: tahLabels, datasets: [{
+      data: tahData,
+      backgroundColor: ['#2D6A4F', '#D4A373'],
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11, family: 'Inter' } } }
+      }
+    }
+  });
+
+  // Top Institutions - Bar
+  const insLabels = Object.keys(json.institusi_top);
+  const insData = Object.values(json.institusi_top);
+  charts.institusi = new Chart(document.getElementById('chartInstitusi'), {
+    type: 'bar',
+    data: { labels: insLabels, datasets: [{
+      label: 'Jumlah Usaha',
+      data: insData,
+      backgroundColor: insData.map((_,i) => COLORS3[i % COLORS3.length]),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' }, stepSize: 1 } },
+        y: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' } } }
+      }
+    }
+  });
+
+  // Platform - Bar
+  const platLabels = Object.keys(json.platform);
+  const platData = Object.values(json.platform);
+  charts.platform = new Chart(document.getElementById('chartPlatform'), {
+    type: 'bar',
+    data: { labels: platLabels, datasets: [{
+      label: 'Jumlah',
+      data: platData,
+      backgroundColor: platData.map((_,i) => COLORS2[i % COLORS2.length]),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' } } },
+        y: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' }, stepSize: 1 } }
+      }
+    }
+  });
+}
+
+// ── TABLE ──
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const kat = document.getElementById('filterKategori').value;
+  const ins = document.getElementById('filterInstitusi').value;
+  const tah = document.getElementById('filterTahapan').value;
+
+  filteredData = fullData.filter(d => {
+    if (kat && d.kategori !== kat) return false;
+    if (ins && d.institusi !== ins) return false;
+    if (tah && d.tahapan !== tah) return false;
+    if (q) {
+      const haystack = `${d.nama} ${d.kategori} ${d.institusi} ${d.kota} ${d.platform_str} ${d.deskripsi}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (sortKey) {
+    filteredData.sort((a, b) => {
+      const va = (a[sortKey] || '').toLowerCase();
+      const vb = (b[sortKey] || '').toLowerCase();
+      return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
+  }
+
+  document.getElementById('filterCount').textContent = `Menampilkan ${filteredData.length} data`;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+
+  if (filteredData.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filteredData.map(d => {
+    const platforms = d.platform && d.platform.length
+      ? d.platform.map(p => `<span class="badge badge-platform">${p}</span>`).join('')
+      : '<span style="color:#aaa;font-size:0.8rem">—</span>';
+    const tahClass = d.tahapan === 'Tahapan Bertumbuh' ? 'badge-tumbuh' : 'badge-awal';
+    return `<tr>
+      <td><span class="name-cell" onclick="showDetail('${d.id}')">${d.nama}</span></td>
+      <td><span class="badge badge-kat">${d.kategori}</span></td>
+      <td>${d.institusi}</td>
+      <td><span class="badge ${tahClass}">${d.tahapan}</span></td>
+      <td>${d.kota}</td>
+      <td>${platforms}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortTable(key) {
+  if (sortKey === key) { sortAsc = !sortAsc; }
+  else { sortKey = key; sortAsc = true; }
+  filterTable();
+}
+
+// ── MODAL ──
+function showDetail(id) {
+  const d = fullData.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('modalTitle').textContent = d.nama;
+  document.getElementById('modalKategori').textContent = d.kategori;
+  
+  const body = document.getElementById('modalBody');
+  const tahClass = d.tahapan === 'Tahapan Bertumbuh' ? 'badge-tumbuh' : 'badge-awal';
+  const platforms = d.platform && d.platform.length
+    ? d.platform.map(p => `<span class="badge badge-platform">${p}</span>`).join(' ')
+    : '<span style="color:#aaa">—</span>';
+
+  body.innerHTML = `
+    <div class="field">
+      <div class="field-label">Tahapan Usaha</div>
+      <div class="field-value"><span class="badge ${tahClass}">${d.tahapan}</span></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Institusi</div>
+      <div class="field-value">${d.institusi || '—'}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Lokasi</div>
+      <div class="field-value">${d.lokasi || '—'} ${d.gmaps ? `<a href="${d.gmaps}" target="_blank" style="margin-left:8px;font-size:0.8rem">📍 Lihat Maps</a>` : ''}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Platform Penjualan</div>
+      <div class="field-value">${platforms}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Akun Media Sosial</div>
+      <div class="field-value">${d.medsos || '—'}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Website</div>
+      <div class="field-value">${d.website || '—'}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">NIB</div>
+      <div class="field-value">${d.nib || '—'} ${d.tahun_nib ? `(${d.tahun_nib})` : ''}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Deskripsi</div>
+      <div class="field-value">${d.deskripsi_full || d.deskripsi || '—'}</div>
+    </div>
+    <div class="field" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <a href="${d.url_detail}" target="_blank" style="display:inline-block;padding:10px 20px;background:var(--primary);color:white;border-radius:var(--radius-sm);text-decoration:none;font-weight:500;font-size:0.9rem">🔗 Lihat di Website P2MW</a>
+    </div>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget && !e.target.closest('.modal-close')) return;
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal({ target: document.getElementById('modalOverlay'), currentTarget: document.getElementById('modalOverlay') });
+});
+
+// ── INIT ──
+loadData();
+</script>
+</body>
+</html>
